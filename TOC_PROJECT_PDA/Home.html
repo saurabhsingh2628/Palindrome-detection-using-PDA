@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palindrome detection </title> 
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>  
+
+    <div class="cursor"></div>
+
+   <div class="heading">
+         <h1>Finitie Automata  </h1> 
+    </div> 
+
+    <div class="line">  
+        <p class="heading2">for</p>
+        <span class="heading3" id="palindrome">Palindrome</span>   
+    </div>    
+    
+    <div class="heading4">
+          <h1>Detection</h1>
+    </div>        
+
+    <div class="about-palindrome">     
+           <h2>Do you know Palindrome?</h2> 
+           <p>A palindrome is a word, phrase, number, or sequence of characters that reads the same forward and backward, ignoring spaces, punctuation, and capitalization. This means that if you flip it, the order of the letters or digits remains unchanged. Some common examples include words like "level," "radar," "madam," and "noon." Even names like "Anna" and "Malayalam" are palindromes. Numbers such as 121, 1331, and 12321 also follow this rule. Palindromes can even be full sentences, like "Was it a car or a cat I saw?" or "Never odd or even." These fascinating patterns make palindromes a fun and unique part of language and mathematics!</p>
+           
+    </div>  
+
+    <div class="dfa-nfa">
+          <h2> DFA & NFA for Palindrome?</h2>
+          <p>DFA and NFA fail to detect palindromes due to their fundamental limitation of having no memory to store and compare parts of a string. Palindromes require checking whether a string reads the same forward and backward, which demands storing the first half and comparing it with the reversed second half. However, finite automata process input in a single left-to-right pass and lack a stack or any mechanism to remember previous inputs. Since they cannot backtrack or store unbounded data, they are unable to recognize palindromes. As a result, palindromes belong to the class of context-free languages, requiring at least a Pushdown Automaton (PDA) with a stack for proper recognition.</p>
+    </div>
+      
+       <div class="pda">
+            <h2>PDA for Palindrome</h2> 
+            <p>A Pushdown Automaton (PDA) is capable of recognizing palindromes because it has a stack, allowing it to store and compare characters. As it reads the first half of the input, it pushes symbols onto the stack. When it reaches the middle, it starts popping and comparing with the remaining characters. This ensures that the string reads the same forward and backward, which is essential for palindrome detection. Unlike DFA and NFA, which lack memory, a PDA can handle the non-regular nature of palindromes by utilizing its stack for symmetry verification.</p>
+       </div>
+    
+
+    <button class="btn" id="checkPalindromeBtn">Check Palindrome</button>
+
+<script src="script.js"></script>      
+</body>
+</html>

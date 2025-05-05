@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDA for Palindrome Detection</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>  
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Baloo+Bhai+2:wght@400..800&family=Barriecito&display=swap'); 
+
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Baloo+Bhai+2:wght@400..800&family=Barriecito&family=Oswald:wght@200..700&family=Pacifico&family=Signika:wght@300..700&family=Tektur:wght@400..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');  
+        body {
+            
+            font-family: "Baloo Bhai 2";
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 20px; 
+            background-color: #000000;
+            background-image: radial-gradient(rgba(255, 255, 255,0.49 ) 1px, transparent 0.5px);
+            background-size: 10px 10px; 
+        }
+        
+        h1 {
+            color: #CC0000;
+            font-size: 3em;
+            font-family: "Anton";
+        }
+        
+        .input-section {
+            margin: 20px;
+        }
+        
+        input {
+            padding: 10px;
+            font-size: 1em;
+            width: 250px;
+            margin-right: 10px;
+            border-radius: 20px;
+            border: none;
+            outline: none; 
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #5cfc84;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;  
+            border-radius: 50px;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #fff;
+            color: #50fa7b; 
+        }
+        
+        #result {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        
+        #stack {
+            margin-top: 30px;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            position: relative;
+            width: 250px;
+        }
+        
+        #stackList {
+            list-style-type: none;
+            padding: 0;
+            height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        #stackList li {
+            padding: 12px;
+            background-color: #444;
+            border-radius: 8px;
+            margin: 5px 0;
+            width: 70%;
+            text-align: center;
+            font-weight: bold;
+            transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+        }
+        
+        #stackList li:hover {
+            background-color: #50fa7b;
+            cursor: pointer;
+        }
+        
+        #stackList li.pop {
+            background-color: red !important;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        #stackList li.push {
+            background-color: #50fa7b;
+            transform: scale(1.1);
+        }
+        
+        #visualization {
+            margin-top: 50px;
+        }
+        
+        .state {
+            fill: #ff4384;
+            stroke: white;
+            stroke-width: 3;
+        }
+        
+        .state.accept {
+            fill: lime;
+        }
+        
+        .state.reject {
+            fill: red;
+        }
+        
+        text {
+            fill: white;
+            font-size: 16px;
+        }
+        
+        
+    </style>
+</head>
+<body>
+    <h1>Palindrome Detection using PDA</h1>
+    
+    <div class="input-section">
+        <input type="text" id="inputString" placeholder="Enter a string">
+        <button onclick="checkPalindrome()">Check Palindrome</button>
+    </div>
+
+    <div id="result"></div>
+
+    <h2>Pushdown Automaton Visualization</h2>
+    <svg id="visualization" width="900" height="350"></svg>
+
+    <h2>Stack Visualization</h2>
+    <div id="stack">
+        <h3>Current Stack:</h3>
+        <ul id="stackList"></ul>
+        <input type="text" id="inputValue" placeholder="Enter value to push">
+        <button id="pushButton">Push</button>
+        <button id="popButton">Pop</button>
+    </div>
+
+    <script> 
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelector("button").addEventListener("click", checkPalindrome);
+            document.getElementById("pushButton").addEventListener("click", pushStack);
+            document.getElementById("popButton").addEventListener("click", popStack);
+        });
+        
+        let stack = [];
+        
+        // Function to check if a string is a palindrome using a stack
+        function isPalindromeWithStack(str) {
+            let cleanedStr = str.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); // Clean input
+            let mid = Math.floor(cleanedStr.length / 2);
+            stack = []; // Reset stack for each new check
+        
+            // Push first half onto stack
+            for (let i = 0; i < mid; i++) {
+                stack.push(cleanedStr[i]);
+                updateStackVisualization();
+            }
+        
+            // Skip middle character for odd-length strings
+            let start = cleanedStr.length % 2 === 0 ? mid : mid + 1;
+        
+            // Compare second half with stack
+            for (let i = start; i < cleanedStr.length; i++) {
+                if (stack.pop() !== cleanedStr[i]) {
+                    updateStackVisualization(true); // Mark it as incorrect
+                    return false;
+                }
+                updateStackVisualization();
+            }
+        
+            return true;
+        }
+        
+        // Function to check palindrome and visualize PDA and stack
+        function checkPalindrome() {
+            let input = document.getElementById("inputString").value.trim();
+        
+            if (input === "") {
+                alert("Please enter a string!");
+                return;
+            }
+        
+            let result = isPalindromeWithStack(input);
+        
+            // Display result
+            let resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = result ? "✅ Palindrome Detected!" : "❌ Not a Palindrome!";
+            resultDiv.style.color = result ? "lime" : "red";
+        
+            // Visualize PDA
+            visualizePDA(result);
+        }
+        
+        // Function to visualize PDA states
+        // Function to visualize PDA states
+        function visualizePDA(isAccepted) {
+            d3.select("#visualization").selectAll("*").remove(); // Clear previous visualization
+        
+            let svg = d3.select("#visualization");
+            let states = ["q0", "q1", "q2", "q3 (Accept)"];
+            let transitions = [
+                { from: "q0", to: "q1", label: "Push Left to Stack" },
+                { from: "q1", to: "q2", label: "Pop & Compare" },
+                { from: "q2", to: "q3 (Accept)", label: "End Check" }
+            ];
+        
+            let statePositions = {
+                "q0": [100, 150], "q1": [350, 150], "q2": [600, 150], "q3 (Accept)": [850, 150]
+            };
+        
+            // Draw states
+            states.forEach(state => {
+                let [x, y] = statePositions[state];
+                svg.append("circle")
+                    .attr("class", "state")
+                    .attr("cx", x)
+                    .attr("cy", y)
+                    .attr("r", 40)
+                    .attr("fill", "cyan")
+                    .attr("stroke", "white")
+                    .attr("stroke-width", 3)
+                    .transition()
+                    .duration(500)
+                    .attr("fill", state === "q3 (Accept)" && isAccepted ? "lime" : (state === "q3 (Accept)" && !isAccepted ? "red" : "cyan"))
+                    .attr("class", state === "q3 (Accept)" && isAccepted ? "state accept" : (state === "q3 (Accept)" && !isAccepted ? "state reject" : "state"));
+        
+                svg.append("text")
+                    .attr("x", x)
+                    .attr("y", y + 5)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "16px")
+                    .attr("fill", "white")
+                    .text(state);
+            });
+        
+            // Draw transitions (arrows)
+            transitions.forEach(({ from, to, label }) => {
+                let [x1, y1] = statePositions[from];
+                let [x2, y2] = statePositions[to];
+        
+                svg.append("line")
+                    .attr("x1", x1 + 40)
+                    .attr("y1", y1)
+                    .attr("x2", x2 - 40)
+                    .attr("y2", y2)
+                    .attr("stroke", "white")
+                    .attr("stroke-width", 2)
+                    .attr("marker-end", "url(#arrow)");
+        
+                svg.append("text")
+                    .attr("x", (x1 + x2) / 2)
+                    .attr("y", (y1 + y2) / 2 - 10)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "14px")
+                    .attr("fill", "white")
+                    .text(label);
+            });
+        }
+        
+        
+        // Function to update the stack visualization dynamically
+        function updateStackVisualization(isIncorrect = false) {
+            let stackContainer = document.getElementById("stackList");
+            stackContainer.innerHTML = '';  // Clear the stack container
+        
+            // Visualize the stack (animate push)
+            stack.forEach((value, index) => {
+                let stackItem = document.createElement("li");
+                stackItem.textContent = value;
+                stackItem.classList.add('push');  // Add push animation class
+                stackContainer.appendChild(stackItem);
+            });
+        
+            if (isIncorrect) {
+                let errorMessage = document.createElement("li");
+                errorMessage.textContent = "Mismatch detected!";
+                errorMessage.style.color = "red";
+                stackContainer.appendChild(errorMessage);
+            }
+        }
+        
+        // Function to push an element onto the stack (for stack visualization)
+        function pushStack() {
+            let input = document.getElementById("inputValue").value;
+            if (input === "") {
+                alert("Please enter a value.");
+                return;
+            }
+        
+            // Push the value to the stack
+            stack.push(input);
+            document.getElementById("inputValue").value = ""; // Clear the input field
+            updateStackVisualization();
+        }
+        
+        // Function to pop an element from the stack (for stack visualization)
+        function popStack() {
+            if (stack.length === 0) {
+                alert("Stack is empty.");
+                return;
+            }
+        
+            // Pop the last element from the stack
+            let poppedValue = stack.pop();
+            updateStackVisualization();
+        }
+        
+    </script>
+</body>
+</html>
